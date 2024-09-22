@@ -27,11 +27,8 @@ public class UserService(AppDbContext context): IUserService
     }
     public async Task<User> AuthenticateAsync(string email, string password)
     {
-        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
-        if (user is null)
-        {
-            throw new Exception("User not found");
-        }
+        var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email) ?? throw new Exception("User not found");
+        if(string.Compare(user.Password, password) != 0 ) throw new Exception("Invalid email or passqord");
         return user;
     }
 

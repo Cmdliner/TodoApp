@@ -16,22 +16,30 @@ public class UserController(IUserService userService, IConfiguration configurati
 
     private string GenerateJwtToken(User user)
     {
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
-        var tokenDescriptor = new SecurityTokenDescriptor
+        try
         {
-            Subject = new ClaimsIdentity(
-            [
-                new Claim("id", user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.Username)
-            ]),
-            Expires = DateTime.UtcNow.AddDays(30),
-            SigningCredentials = new SigningCredentials (new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"]
-        };
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(
+                [
+                    new Claim("id", user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.Username)
+                ]),
+                Expires = DateTime.UtcNow.AddDays(30),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = _configuration["Jwt:Issuer"],
+                Audience = _configuration["Jwt:Audience"]
+            };
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            return tokenHandler.WriteToken(token);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw new  Exception(ex.Message);
+        }
     }
 
     [HttpPost("register")]
@@ -40,7 +48,7 @@ public class UserController(IUserService userService, IConfiguration configurati
         try
         {
             var user = await _userService.RegisterAsync(model.Username, model.Email, model.Password);
-            return Ok(new { message = "User regisered successfully" });
+            return CreatedAtAction(nameof(Register), new { message = "User regisered successfully" });
         }
         catch (Exception ex)
         {
@@ -56,8 +64,9 @@ public class UserController(IUserService userService, IConfiguration configurati
             var user = await _userService.AuthenticateAsync(model.Email, model.Password);
             //!TODO => Generate JWT token && send in the header
             var token = GenerateJwtToken(user);
-            
-            return Ok ( new {
+
+            return Ok(new
+            {
                 user.Id,
                 user.Username,
                 user.Email,
@@ -66,7 +75,7 @@ public class UserController(IUserService userService, IConfiguration configurati
         }
         catch (Exception)
         {
-            return Unauthorized( new { message = "Invalid email or password" });
+            return Unauthorized(new { message = "Invalid email or password" });
         }
     }
 }
