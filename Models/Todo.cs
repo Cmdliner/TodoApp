@@ -18,7 +18,7 @@ public class Todo
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public DateOnly UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
     public Guid UserId { get; set; }
 
