@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace TodoApp.Models;
+namespace TodoApp.Services;
 
-public class TodoService(AppDbContext context)
+public class TodoService(AppDbContext context): ITodoService
 {
     private readonly AppDbContext _context = context;
     public async Task<IEnumerable<Todo>> GetAllAsync(Guid userId)

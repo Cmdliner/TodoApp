@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace TodoApp.Models;
+namespace TodoApp.Services;
 
 public class UserService(AppDbContext context): IUserService
 {
